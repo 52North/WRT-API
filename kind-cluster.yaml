@@ -1,0 +1,19 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: wrt-api
+nodes:
+  - role: control-plane
+    # Check
+    #     https://github.com/kubernetes-sigs/kind/releases
+    # for available versions matching your local kubectl version
+    image: kindest/node:v1.34.3@sha256:08497ee19eace7b4b5348db5c6a1591d7752b164530a36f855cb0f2bdcbadd48
+    extraPortMappings:
+    - containerPort: 30080
+      hostPort: 30080
+      protocol: TCP
+    - containerPort: 30090
+      hostPort: 30090
+      protocol: TCP
+    - containerPort: 30100
+      hostPort: 30100
+      protocol: TCP
