@@ -103,20 +103,19 @@ data:
             - sleep 10
             - echo oh no, we are failing
             - exit 1
-      generic-image-processor-example:
+      weather-routing-tool:
         type: process
         processor:
           name: pygeoapi_k8s_manager.process.GenericImageProcessor
           metadata:
             version: 0.1
-            id: generic-image-processor-example
+            id: weather-routing-tool
             title:
-              en: "Generic Image Processor Example"
+              en: "Weather Routing Tool"
             description:
-              en: "Example Configuration of Generic Image Processor"
+              en: "Weather Routing Tool"
             keywords:
-              - generic image processor example
-              - example
+              - weather routing tool
               - generic image processor
               - k8s
               - k8s manager
@@ -125,12 +124,42 @@ data:
               - type: text/html
                 rel: about
                 title: Processor Code Repository
-                href: https://github.com/52North/pygeoapi_k8s-manager/tree/main/src/pygeoapi_k8s_manager/process/generic_image.py
+                href: https://github.com/52North/pygeoapi_k8s-manager/blob/main/src/pygeoapi_k8s_manager/process/generic_image.py
+                hreflang: en-UK
+              - type: text/html
+                rel: about
+                title: WeatherRoutingTool API Code Repository
+                href: https://github.com/52North/WRT-API
+                hreflang: en-UK
+              - type: text/html
+                rel: about
+                title: WeatherRoutingTool Code Repository
+                href: https://github.com/52North/WeatherRoutingTool
                 hreflang: en-UK
             inputs:
               token:
                 title: secret token
                 description: identify yourself
+                schema:
+                  type: string
+              wrt_*:
+                title: Weather Routing Tool config parameter
+                description: Input parameters with the prefix "wrt_" are mapped to the corresponding config parameter (https://52north.github.io/WeatherRoutingTool/source/configuration.html). Use all lowercase characters for the process inputs.
+                schema:
+                  type: string
+              wrt_departure_time:
+                title: Departure time
+                description: Departure time in the format 'yyyy-mm-ddThh:mmZ'. Maps to the config parameter DEPARTURE_TIME.
+                schema:
+                  type: string
+              wrt_default_route:
+                title: Default route
+                description: Source and destination in the format '(lat_start, lon_start, lat_end, lon_end)'. Maps to the config parameter DEFAULT_ROUTE.
+                schema:
+                  type: string
+              wrt_default_map:
+                title: Default map
+                description: Map/bbox in the format '(lat_min, lon_min, lat_max, lon_max)'. Maps to the config parameter DEFAULT_MAP.
                 schema:
                   type: string
             outputs:
@@ -143,27 +172,31 @@ data:
             example:
               inputs:
                 token: token
-          default_image: bash:latest
+          default_image: 52north/weather-routing-api:latest
           # OPTIONAL
           # image_pull_secret: default-secret
-          command:
-            - bash
-            - -c
-            - "date; env | sort"
           env:
-            # env from secrets (requires existing secrets in k8s cluster!)
-            # - name: EXAMPLE_ENV_FROM_SECRET
-            #   secret_name: example-secret-name
-            #   secret_key: example-secret-key
-            # simple env
-            - name: SIMPLE_ENV_BOOLEAN_AS_STRING
-              value: "False"
-            - name: SIMPLE_ENV_BOOLEAN_AS_BOOLEAN
-              value: False
-            - name: SIMPLE_ENV_STRING
-              value: "simple-env-string"
-            - name: SIMPLE_ENV_INTEGER
-              value: 1024
+          - name: PROCESS_OUTPUTS_BUCKET_ENDPOINT
+            value: 
+          - name: PROCESS_OUTPUTS_BUCKET_KEY
+            value: alarik_admin
+          - name: PROCESS_OUTPUTS_BUCKET_SECRET
+            value: alarik_admin
+          - name: PROCESS_OUTPUTS_BUCKET_NAME
+            value: wrt
+          - name: PROCESS_OUTPUTS_BUCKET_PATH_PREFIX
+            # adds <process-id>/outputs/<job-id> from env variables during runtime
+            value: k8s-job-manager/processes/
+          - name: PROCESS_OUTPUTS_LOCAL_PATH_PREFIX
+            value: /app/workdir/
+          - name: WRT_FIGURE_PATH
+            value: /app/workdir/figures/
+          - name: CMEMS_USERNAME
+            secret_name: cmems-credentials
+            secret_key: user
+          - name: CMEMS_PASSWORD
+            secret_name: cmems-credentials
+            secret_key: password
           resources:
             requests:
               memory: 16M

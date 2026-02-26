@@ -1,0 +1,2 @@
+s3fs
+WeatherRoutingTool@git+https://github.com/52North/WeatherRoutingTool

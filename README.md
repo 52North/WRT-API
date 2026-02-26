@@ -19,7 +19,7 @@ The following sections provide step-by-step instructions on how to deploy a loca
 Create cluster:
 
 ```shell
-kind create cluster --config kind-cluster.yaml
+kind create cluster --config k8s/kind-cluster.yaml
 ```
 
 **Important**: Be sure to use a compatible version for your kind cluster. Versions between client (kubectl) and server (kind) are only allowed to differ in minor version of +/-1. The kind version is defined in `kind-cluster.yaml` via the image tag. The kubectl version can be checked with `kubectl version`.
@@ -50,16 +50,30 @@ kind load docker-image --name wrt-api 52north/pygeoapi-k8s-manager:latest
 
 ### Weather Routing Tool
 
-The latest image of the Weather Routing Tool can be pulled from Docker Hub (not yet supported):
-
-ToDo: add shell command after uploading the image to Docker Hub.
-
 Alternatively, the  image can be built locally, see instructions [outlined in the documentation](https://52north.github.io/WeatherRoutingTool/).
+
+```shell
+VERSION=local \
+REGISTRY=docker.io \
+IMAGE=52north/weather-routing-api \
+; \
+docker build \
+  -t "${REGISTRY}/${IMAGE}:latest" \
+  -t "${REGISTRY}/${IMAGE}:${VERSION}" \
+  --build-arg VERSION="$VERSION" \
+  --build-arg BUILD_DATE=$(date -u --iso-8601=seconds) \
+  --build-arg GIT_COMMIT=$(git rev-parse --short=20 -q --verify HEAD) \
+  --build-arg GIT_TAG=$(git describe --tags) \
+  --build-arg GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD) \
+  .
+```
+
+Currently, there is no public image of the Weather Routing API available on Docker Hub.
 
 [Load docker image](https://kind.sigs.k8s.io/docs/user/quick-start/#loading-an-image-into-your-cluster) into kind cluster:
 
 ```shell
-kind load docker-image --name wrt-api 52north/weather-routing-tool:latest
+kind load docker-image --name wrt-api 52north/weather-routing-api:latest
 ```
 
 ### Kind image management (for debugging)
@@ -76,18 +90,42 @@ Delete image:
 docker exec -it wrt-api-control-plane crictl rmi <id>
 ```
 
+## Copernicus credentials
+
+If you don't have a Copernicus Marine Service account yet, register at https://marine.copernicus.eu/.
+
+Create a secret `.secrets.cmems` file to be used during secret creation to not leak information in the shell history:
+
+```ini
+user=
+password=
+```
+
+Create the secret with the following command:
+
+```shell
+kubectl create secret generic cmems-credentials --from-env-file=.secrets.cmems
+```
+
+Verify the secret (debugging):
+
+```shell
+echo "User: '$(kubectl get secrets cmems-credentials --template='{{ index .data "user" }}' | base64 -d)'" && \
+echo "Password: '$(kubectl get secrets cmems-credentials --template='{{ index .data "password" }}' | base64 -d)'"
+```
+
 ## Run containers
 
 Apply k8s manifests:
 
 ```shell
-WRT-API/$ kubectl apply -k .
+WRT-API/k8s$ kubectl apply -k .
 ```
 
 Check k8s resources (for debugging):
 
 ```shell
-WRT-API/$ kubectl get all
+WRT-API/k8s$ kubectl get all
 ```
 
 ## Test application
@@ -132,6 +170,11 @@ Execute the following command to clean up the cluster and its configuration:
 ```shell
 kind delete cluster --name kind-wrt-api
 ```
+
+## ToDo
+
+- Add a dummy job object so you users don't need to wait for an actual job to finish
+- Create a fixture for s3 ('wrt' bucket)
 
 ## Funding
 
