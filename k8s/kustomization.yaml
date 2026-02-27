@@ -6,3 +6,4 @@ namespace: default
 resources:
   - configmap.yaml
   - manager.yaml
+  - alarik.yaml
