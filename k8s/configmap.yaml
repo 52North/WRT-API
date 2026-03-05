@@ -107,6 +107,7 @@ data:
         type: process
         processor:
           name: pygeoapi_k8s_manager.process.GenericImageProcessor
+          check_auth: False
           metadata:
             version: 0.1
             id: weather-routing-tool
@@ -137,11 +138,6 @@ data:
                 href: https://github.com/52North/WeatherRoutingTool
                 hreflang: en-UK
             inputs:
-              token:
-                title: secret token
-                description: identify yourself
-                schema:
-                  type: string
               wrt_*:
                 title: Weather Routing Tool config parameter
                 description: Input parameters with the prefix "wrt_" are mapped to the corresponding config parameter (https://52north.github.io/WeatherRoutingTool/source/configuration.html). Use all lowercase characters for the process inputs.
@@ -171,17 +167,22 @@ data:
                   contentMediaType: application/json
             example:
               inputs:
-                token: token
-          default_image: 52north/weather-routing-api:latest
+                wrt_departure_time: 2026-02-28T12:00Z
+                wrt_default_route: [53.55, 0.16, 52.0, 4.0]
+                wrt_default_map: [51.9, 0.0, 53.7, 4.3]
+                wrt_boat_speed: 10
+                wrt_algorithm_type: gcr_slider
+                wrt_contraints_list: ["land_crossing_global_land_mask", "on_map"]
+          default_image: 52north/weather-routing-api:local
           # OPTIONAL
-          # image_pull_secret: default-secret
+          # image_pull_secrets: default-secret
           env:
           - name: PROCESS_OUTPUTS_BUCKET_ENDPOINT
-            value: 
+            value: http://alarik-service:8080
           - name: PROCESS_OUTPUTS_BUCKET_KEY
-            value: alarik_admin
+            value: wrt-key
           - name: PROCESS_OUTPUTS_BUCKET_SECRET
-            value: alarik_admin
+            value: wrt-secret
           - name: PROCESS_OUTPUTS_BUCKET_NAME
             value: wrt
           - name: PROCESS_OUTPUTS_BUCKET_PATH_PREFIX
@@ -191,19 +192,20 @@ data:
             value: /app/workdir/
           - name: WRT_FIGURE_PATH
             value: /app/workdir/figures/
-          - name: CMEMS_USERNAME
-            secret_name: cmems-credentials
-            secret_key: user
-          - name: CMEMS_PASSWORD
-            secret_name: cmems-credentials
-            secret_key: password
+          #- name: CMEMS_USERNAME
+          #  secret_name: cmems-credentials
+          #  secret_key: user
+          #- name: CMEMS_PASSWORD
+          #  secret_name: cmems-credentials
+          #  secret_key: password
+          # resources might need to be adjusted
           resources:
             requests:
-              memory: 16M
-              cpu: 10m
+              memory: 3G
+              cpu: 500m
             limits:
-              memory: 256M
-              cpu: 100m
+              memory: 10G
+              cpu: 2000m
           tolerations:
           - key: "toleration-key"
             value: "toleration-value"

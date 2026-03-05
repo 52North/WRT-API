@@ -6,8 +6,9 @@ from datetime import datetime
 
 from s3fs import S3FileSystem
 
-from WeatherRoutingTool.execute_routing import execute_routing
 from WeatherRoutingTool.config import Config, set_up_logging
+from WeatherRoutingTool.execute_routing import execute_routing
+from WeatherRoutingTool.ship.ship_config import ShipConfig
 
 # Necessary to avoid writing checksums into files when uploading them to the bucket (cf. https://github.com/boto/boto3/issues/4435)
 os.environ["AWS_REQUEST_CHECKSUM_CALCULATION"] = "when_required"
@@ -98,12 +99,14 @@ def main():
         logger.error(f"Could not parse process inputs '{input_str}'. Error: '{err}'")
         raise
 
-    # WRT config
+    # Extract config params from process input
     input_config = extract_params_from_process_inputs(input_dict)
+
+    # WRT config
     config_dict = {
         "DEPTH_DATA": "/app/workdir/depth.nc",
         "WEATHER_DATA": "/app/workdir/weather.nc",
-        "ROUTE_PATH": "/app/workdir/final_route.geojson",
+        "ROUTE_PATH": "/app/workdir",
     }
     config_dict = config_dict | input_config
     config = Config.validate_config(config_dict)
@@ -111,8 +114,30 @@ def main():
     info_log_file = "/app/workdir/info.log"
     set_up_logging(info_log_file, debug=debug)
 
+    # Ship config
+    ship_config_dict = {
+        "DEPTH_DATA": "/app/workdir/depth.nc",
+        "WEATHER_DATA": "/app/workdir/weather.nc",
+        "ROUTE_PATH": "/app/workdir",
+        "BOAT_SMCR_POWER": 6502,
+        "BOAT_SMCR_SPEED": 7,
+        "BOAT_FUEL_RATE": 167,
+        "BOAT_DRAUGHT_AFT": 10,
+        "BOAT_DRAUGHT_FORE": 10,
+        "BOAT_LENGTH": 180,
+        "BOAT_BREADTH": 32,
+        "BOAT_HBR": 30,
+        "BOAT_AXV": 716,
+        "BOAT_AYV": 1910,
+        "BOAT_AOD": 529,
+        "BOAT_CMC": 8.1,
+        "BOAT_HC": 7.06
+    }
+    ship_config_dict = ship_config_dict | input_config
+    ship_config = ShipConfig.validate_config(ship_config_dict)
+
     # Run WRT
-    execute_routing(config)
+    execute_routing(config, ship_config)
 
     # Upload results to S3 bucket
     output_target = handle_outputs(pygeoapi_process_id, pygeoapi_job_id)

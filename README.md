@@ -32,25 +32,12 @@ kubectl cluster-info --context kind-wrt-api
 
 ## Prepare Docker Images
 
-### Pygeoapi
-
-The latest image of the pygeoapi-k8s-manager enabled pygeoapi can be pulled from Docker Hub:
-
-```shell
-docker pull 52north/pygeoapi-k8s-manager
-```
-
-Alternatively, the  image can be built locally, see the instructions [outlined in the documentation](https://github.com/52North/pygeoapi_k8s-manager/blob/main/README.md#container). You might want to use a different tag for local testing, e.g. set `VERSION` to `local`. In this case, the tag has to be updated in the following command.
-
-[Load docker image](https://kind.sigs.k8s.io/docs/user/quick-start/#loading-an-image-into-your-cluster) into kind cluster:
-
-```shell
-kind load docker-image --name wrt-api 52north/pygeoapi-k8s-manager:latest
-```
+**Important**: if you want to make sure that kind is using your image from the local registry, do not use the "latest" tag. Otherwise, it might try to pull the image from a remote registry.
 
 ### Weather Routing Tool
 
-Alternatively, the  image can be built locally, see instructions [outlined in the documentation](https://52north.github.io/WeatherRoutingTool/).
+Currently, there is no public image of the Weather Routing API available on Docker Hub. 
+Built the image locally in the directory `WRT-API/docker$`:
 
 ```shell
 VERSION=local \
@@ -58,7 +45,6 @@ REGISTRY=docker.io \
 IMAGE=52north/weather-routing-api \
 ; \
 docker build \
-  -t "${REGISTRY}/${IMAGE}:latest" \
   -t "${REGISTRY}/${IMAGE}:${VERSION}" \
   --build-arg VERSION="$VERSION" \
   --build-arg BUILD_DATE=$(date -u --iso-8601=seconds) \
@@ -68,12 +54,23 @@ docker build \
   .
 ```
 
-Currently, there is no public image of the Weather Routing API available on Docker Hub.
-
 [Load docker image](https://kind.sigs.k8s.io/docs/user/quick-start/#loading-an-image-into-your-cluster) into kind cluster:
 
 ```shell
-kind load docker-image --name wrt-api 52north/weather-routing-api:latest
+kind load docker-image --name wrt-api 52north/weather-routing-api:local
+```
+
+### Pygeoapi
+
+The latest image of the pygeoapi-k8s-manager enabled pygeoapi is available on Docker Hub. Kind will pull the image automatically
+if the tag "latest" is used in the k8s manifest `manager.yaml` (default).
+
+Alternatively, the  image can be built locally, see the instructions [outlined in the documentation](https://github.com/52North/pygeoapi_k8s-manager/blob/main/README.md#container).
+
+If a different tag than "latest" is used [load docker image](https://kind.sigs.k8s.io/docs/user/quick-start/#loading-an-image-into-your-cluster) into kind cluster with the correct tag; here we assume its "local":
+
+```shell
+kind load docker-image --name wrt-api 52north/pygeoapi-k8s-manager:local
 ```
 
 ### Kind image management (for debugging)
@@ -91,6 +88,8 @@ docker exec -it wrt-api-control-plane crictl rmi <id>
 ```
 
 ## Copernicus credentials
+
+This step can be skipped if `"wrt_algorithm_type": "gcr_slider"` is used as process input. This is the recommended setting for quick tests.
 
 If you don't have a Copernicus Marine Service account yet, register at https://marine.copernicus.eu/.
 
@@ -132,36 +131,25 @@ WRT-API/k8s$ kubectl get all
 
 Visit pygeoapi at <http://localhost:30080/pygeoapi/>
 
-Execute the "hello world" process **synchronous**:
+Execute the "weather routing tool" process **asynchronous**:
 
 ```shell
 curl -v -X 'POST' \
-  'http://localhost:30080/pygeoapi/processes/hello-world-k8s/execution' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/json' \
-  -d '{
-        "inputs": {
-          "message": "Am I in TV, now?",
-          "name": "John Doe"
-        }
-      }'
-```
-
-or **asynchronous**:
-
-```shell
-curl -v -X 'POST' \
-  'http://localhost:30080/pygeoapi/processes/hello-world-k8s/execution' \
+  'http://localhost:30080/pygeoapi/processes/weather-routing-tool/execution' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
   -H 'Prefer: respond-async' \
   -d '{
         "inputs": {
-          "message": "Am I in TV, now?",
-          "name": "John Doe"
+          "wrt_departure_time": "2026-02-28T12:00Z", 
+          "wrt_default_route": [53.55, 0.16, 52.0, 4.0],
+          "wrt_default_map": [0.0, 51.9, 4.3, 53.7],
+          "wrt_algorithm_type": "gcr_slider"
         }
       }'
 ```
+
+Visit alarik at <http://localhost:30100/>
 
 ## Remove cluster
 
