@@ -202,11 +202,6 @@ Execute the following command to clean up the cluster and its configuration:
 kind delete cluster --name kind-wrt-api
 ```
 
-## ToDo
-
-- Add a dummy job object so you users don't need to wait for an actual job to finish
-- Create a fixture for s3 ('wrt' bucket)
-
 ## Funding
 
 |                                                               Project/Logo                                                                | Description                                                                                                                                                                                                                                                                                 |

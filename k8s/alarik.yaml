@@ -7,6 +7,15 @@ stringData:
   ADMIN_USERNAME: alarik
   ADMIN_PASSWORD: alarik
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alarik-access-keys
+type: Opaque
+stringData:
+  DEFAULT_ACCESS_KEY: wrt-key
+  DEFAULT_SECRET_KEY: wrt-secret
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -29,6 +38,8 @@ spec:
         envFrom:
           - secretRef:
               name: alarik-credentials
+          - secretRef:
+              name: alarik-access-keys
         env:
         - name: API_BASE_URL
           value: http://localhost:30090
@@ -71,6 +82,19 @@ spec:
       labels:
         app: alarik-console
     spec:
+      initContainers:
+      - name: create-bucket
+        image: curlimages/curl:8.17.0
+        command: [ "sh", "-c" ]
+        args:
+          - |
+            until curl -X 'GET' http://alarik-service:8080/api/v1/health -s --head --fail; \
+            do echo 'Waiting for Alarik backend'; sleep 5; done; \
+            curl -X 'POST' http://alarik-service:8080/api/v1/buckets -s \
+            -H 'Content-Type: application/json' \
+            -H 'X-Access-Key: wrt-key' \
+            -H 'X-Secret-Key: wrt-secret' \
+            -d '{"name":"wrt", "versioningEnabled":true}'
       containers:
       - name: alarik-console
         image: ghcr.io/achtungsoftware/alarik-console:latest
