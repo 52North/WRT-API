@@ -65,6 +65,7 @@ def upload_folder_to_s3_bucket(
 
 def handle_outputs(pygeoapi_process_id, pygeoapi_job_id) -> str:
     outputs_bucket_endpoint = os.getenv("PROCESS_OUTPUTS_BUCKET_ENDPOINT")
+    outputs_public_bucket_endpoint = os.getenv("PROCESS_OUTPUTS_PUBLIC_BUCKET_ENDPOINT")
     outputs_bucket_key = os.getenv("PROCESS_OUTPUTS_BUCKET_KEY")
     outputs_bucket_secret = os.getenv("PROCESS_OUTPUTS_BUCKET_SECRET")
     outputs_bucket_name = os.getenv("PROCESS_OUTPUTS_BUCKET_NAME")
@@ -79,7 +80,7 @@ def handle_outputs(pygeoapi_process_id, pygeoapi_job_id) -> str:
         outputs_bucket_key,
         outputs_bucket_secret,
     )
-    return f"{outputs_bucket_endpoint}/{outputs_bucket_full_path}"
+    return f"{outputs_public_bucket_endpoint}/{outputs_bucket_full_path}"
 
 
 def main():

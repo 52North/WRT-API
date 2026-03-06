@@ -33,7 +33,7 @@ data:
           kubernetes: INFO
           pygeoapi.l10n: ERROR
         # enable k8s finalizer controller
-        finalizer_controller: false
+        finalizer_controller: true
       admin: false # enable admin api
     logging:
       level: DEBUG
@@ -167,10 +167,10 @@ data:
                   contentMediaType: application/json
             example:
               inputs:
-                wrt_departure_time: 2026-02-28T12:00Z
+                wrt_departure_time: 2026-03-06T12:00Z
                 wrt_default_route: [53.55, 0.16, 52.0, 4.0]
                 wrt_default_map: [51.9, 0.0, 53.7, 4.3]
-                wrt_boat_speed: 10
+                wrt_boat_speed: 6
                 wrt_algorithm_type: gcr_slider
                 wrt_contraints_list: ["land_crossing_global_land_mask", "on_map"]
           default_image: 52north/weather-routing-api:local
@@ -179,6 +179,8 @@ data:
           env:
           - name: PROCESS_OUTPUTS_BUCKET_ENDPOINT
             value: http://alarik-service:8080
+          - name: PROCESS_OUTPUTS_PUBLIC_BUCKET_ENDPOINT
+            value: http://localhost:30100
           - name: PROCESS_OUTPUTS_BUCKET_KEY
             value: wrt-key
           - name: PROCESS_OUTPUTS_BUCKET_SECRET

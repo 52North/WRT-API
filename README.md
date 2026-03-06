@@ -37,7 +37,7 @@ kubectl cluster-info --context kind-wrt-api
 ### Weather Routing Tool
 
 Currently, there is no public image of the Weather Routing API available on Docker Hub. 
-Built the image locally in the directory `WRT-API/docker$`:
+Build the image locally in the directory `WRT-API/docker$`:
 
 ```shell
 VERSION=local \
@@ -65,9 +65,9 @@ kind load docker-image --name wrt-api 52north/weather-routing-api:local
 The latest image of the pygeoapi-k8s-manager enabled pygeoapi is available on Docker Hub. Kind will pull the image automatically
 if the tag "latest" is used in the k8s manifest `manager.yaml` (default).
 
-Alternatively, the  image can be built locally, see the instructions [outlined in the documentation](https://github.com/52North/pygeoapi_k8s-manager/blob/main/README.md#container).
+Alternatively, the image can be built locally, see the instructions [outlined in the documentation](https://github.com/52North/pygeoapi_k8s-manager/blob/main/README.md#container).
 
-If a different tag than "latest" is used [load docker image](https://kind.sigs.k8s.io/docs/user/quick-start/#loading-an-image-into-your-cluster) into kind cluster with the correct tag; here we assume its "local":
+If a different tag than "latest" is used, [load docker image](https://kind.sigs.k8s.io/docs/user/quick-start/#loading-an-image-into-your-cluster) into kind cluster with the correct tag; here we assume its "local":
 
 ```shell
 kind load docker-image --name wrt-api 52north/pygeoapi-k8s-manager:local
@@ -129,9 +129,13 @@ WRT-API/k8s$ kubectl get all
 
 ## Test application
 
-Visit pygeoapi at <http://localhost:30080/pygeoapi/>
+Pygeoapi is running at <http://localhost:30080/pygeoapi/>.
 
-Execute the "weather routing tool" process **asynchronous**:
+Alarik is running at <http://localhost:30100/>.
+
+### Execute process
+
+Execute the "weather routing tool" process **asynchronously**:
 
 ```shell
 curl -v -X 'POST' \
@@ -141,15 +145,54 @@ curl -v -X 'POST' \
   -H 'Prefer: respond-async' \
   -d '{
         "inputs": {
-          "wrt_departure_time": "2026-02-28T12:00Z", 
-          "wrt_default_route": [53.55, 0.16, 52.0, 4.0],
-          "wrt_default_map": [0.0, 51.9, 4.3, 53.7],
+          "wrt_departure_time": "2026-03-06T12:00Z"
+          "wrt_default_route": [53.55, 0.16, 52.0, 4.0]
+          "wrt_default_map": [51.9, 0.0, 53.7, 4.3]
+          "wrt_boat_speed": 6
           "wrt_algorithm_type": "gcr_slider"
+          "wrt_contraints_list": ["land_crossing_global_land_mask", "on_map"]
         }
       }'
 ```
 
-Visit alarik at <http://localhost:30100/>
+### Get process result
+
+In the following command, substitute the job id (`2026-03-06_d63f2052-193e-11f1-beea-4661ad013146`) with the actual id.
+
+```shell
+curl -v http://localhost:30080/pygeoapi/jobs/d63f2052-193e-11f1-beea-4661ad013146/results?f=json \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json'
+```
+
+This will return a link to the s3 output folder. From there the actual route can be downloaded:
+
+1. Via UI:
+   - Visit Alarik at <http://localhost:30100/> and login (default: alarik/alarik).
+   - Navigate to the output folder and download the final route.
+2. Programmatically:
+   - Alarik currently doesn't support public download urls (see https://github.com/achtungsoftware/alarik/issues/7).
+   - Via shell and Alarik's internal API:
+    ```shell
+    curl -v -X 'POST' \
+      'http://localhost:30090/api/v1/objects/download' \
+      -H 'accept: application/json' \
+      -H 'Content-Type: application/json' \
+      -H 'X-Access-Key: wrt-key' \
+      -H 'X-Secret-Key: wrt-secret' \
+      -d '{
+            "bucket": "wrt",
+            "keys": ["k8s-job-manager/processes/weather-routing-tool/outputs/2026-03-06_d63f2052-193e-11f1-beea-4661ad013146/route_gcr_slider.geojson"]
+         }'
+    ```
+   - Via Python and s3:
+    ```python
+    from s3fs import S3FileSystem
+    
+    s3 = S3FileSystem(endpoint_url="http://localhost:30090", key="wrt-key", secret="wrt-secret")
+    # Substitute job id ("2026-03-06_d63f2052-193e-11f1-beea-4661ad013146") with actual id
+    s3.get("wrt/k8s-job-manager/processes/weather-routing-tool/outputs/2026-03-06_d63f2052-193e-11f1-beea-4661ad013146/route_gcr_slider.geojson", "~/Downloads/route_gcr_slider.geojson")
+    ```
 
 ## Remove cluster
 

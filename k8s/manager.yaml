@@ -39,16 +39,16 @@ spec:
           #
           # configure log finalizer
           #
-#        - name: PYGEOAPI_K8S_MANAGER_FINALIZER_BUCKET_ENDPOINT
-#          value: http://minio.default.svc.cluster.local:9000
-#        - name: PYGEOAPI_K8S_MANAGER_FINALIZER_BUCKET_KEY
-#          value: minio_admin
-#        - name: PYGEOAPI_K8S_MANAGER_FINALIZER_BUCKET_SECRET
-#          value: minio_admin
-#        - name: PYGEOAPI_K8S_MANAGER_FINALIZER_BUCKET_NAME
-#          value: test-bucket
-#        - name: PYGEOAPI_K8S_MANAGER_FINALIZER_BUCKET_PATH_PREFIX
-#          value: k8s-manager/logs/
+        - name: PYGEOAPI_K8S_MANAGER_FINALIZER_BUCKET_ENDPOINT
+          value: http://alarik-service:8080
+        - name: PYGEOAPI_K8S_MANAGER_FINALIZER_BUCKET_KEY
+          value: wrt-key
+        - name: PYGEOAPI_K8S_MANAGER_FINALIZER_BUCKET_SECRET
+          value: wrt-secret
+        - name: PYGEOAPI_K8S_MANAGER_FINALIZER_BUCKET_NAME
+          value: wrt
+        - name: PYGEOAPI_K8S_MANAGER_FINALIZER_BUCKET_PATH_PREFIX
+          value: k8s-job-manager/processes/weather-routing-tool/logs/
           #
           # end of log finalizer
           #
