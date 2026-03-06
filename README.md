@@ -4,7 +4,9 @@ The Weather Routing API is a REST API for the [Weather Routing Tool](https://git
 
 This repository contains a local test setup of the Weather Routing API with [kind](https://kind.sigs.k8s.io/).
 
-The API is based on the [OGC API Processes standard](https://docs.ogc.org/is/18-062r2/18-062r2.html) and runs with [pygeoapi](https://github.com/geopython/pygeoapi).
+The API is based on the [OGC API Processes standard](https://docs.ogc.org/is/18-062r2/18-062r2.html) and runs with [pygeoapi](https://github.com/geopython/pygeoapi) and a custom [pygeoapi kubernetes job manager](https://github.com/52North/pygeoapi_k8s-manager).
+
+To store process job results, the S3-compatible object store [Alarik](https://alarik.io/) is used. Please note that Alarik is currently in **Alpha**.
 
 The following sections provide step-by-step instructions on how to deploy a local test version with kind.
 
