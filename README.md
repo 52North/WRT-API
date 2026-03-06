@@ -159,7 +159,7 @@ curl -v -X 'POST' \
 
 ### Get process result
 
-In the following command, substitute the job id (`2026-03-06_d63f2052-193e-11f1-beea-4661ad013146`) with the actual id.
+In the following command, substitute the job id (`d63f2052-193e-11f1-beea-4661ad013146`) with the actual id.
 
 ```shell
 curl -v http://localhost:30080/pygeoapi/jobs/d63f2052-193e-11f1-beea-4661ad013146/results?f=json \
@@ -171,7 +171,7 @@ This will return a link to the s3 output folder. From there the actual route can
 
 1. Via UI:
    - Visit Alarik at <http://localhost:30100/> and login (default: alarik/alarik).
-   - Navigate to the output folder and download the final route.
+   - Navigate to the output folder and download the final route (`route_gcr_slider.geojson` if you use the example request).
 2. Programmatically:
    - Alarik currently doesn't support public download urls (see https://github.com/achtungsoftware/alarik/issues/7).
    - Via shell and Alarik's internal API:
@@ -192,7 +192,7 @@ This will return a link to the s3 output folder. From there the actual route can
     from s3fs import S3FileSystem
     
     s3 = S3FileSystem(endpoint_url="http://localhost:30090", key="wrt-key", secret="wrt-secret")
-    # Substitute job id ("2026-03-06_d63f2052-193e-11f1-beea-4661ad013146") with actual id
+    # Substitute the string "2026-03-06_d63f2052-193e-11f1-beea-4661ad013146" path
     s3.get("wrt/k8s-job-manager/processes/weather-routing-tool/outputs/2026-03-06_d63f2052-193e-11f1-beea-4661ad013146/route_gcr_slider.geojson", "~/Downloads/route_gcr_slider.geojson")
     ```
 
