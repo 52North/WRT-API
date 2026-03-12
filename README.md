@@ -147,11 +147,11 @@ curl -v -X 'POST' \
   -H 'Prefer: respond-async' \
   -d '{
         "inputs": {
-          "wrt_departure_time": "2026-03-06T12:00Z"
-          "wrt_default_route": [53.55, 0.16, 52.0, 4.0]
-          "wrt_default_map": [51.9, 0.0, 53.7, 4.3]
-          "wrt_boat_speed": 6
-          "wrt_algorithm_type": "gcr_slider"
+          "wrt_departure_time": "2026-03-06T12:00Z",
+          "wrt_default_route": [53.55, 0.16, 52.0, 4.0],
+          "wrt_default_map": [51.9, 0.0, 53.7, 4.3],
+          "wrt_boat_speed": 6,
+          "wrt_algorithm_type": "gcr_slider",
           "wrt_contraints_list": ["land_crossing_global_land_mask", "on_map"]
         }
       }'
@@ -192,7 +192,7 @@ This will return a link to the s3 output folder. From there the actual route can
     from s3fs import S3FileSystem
     
     s3 = S3FileSystem(endpoint_url="http://localhost:30090", key="wrt-key", secret="wrt-secret")
-    # Substitute the string "2026-03-06_d63f2052-193e-11f1-beea-4661ad013146" path
+    # Substitute the string "2026-03-06_d63f2052-193e-11f1-beea-4661ad013146" in the path with the one from the response
     s3.get("wrt/k8s-job-manager/processes/weather-routing-tool/outputs/2026-03-06_d63f2052-193e-11f1-beea-4661ad013146/route_gcr_slider.geojson", "~/Downloads/route_gcr_slider.geojson")
     ```
 
