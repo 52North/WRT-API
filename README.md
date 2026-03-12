@@ -152,7 +152,7 @@ curl -v -X 'POST' \
           "wrt_default_map": [51.9, 0.0, 53.7, 4.3],
           "wrt_boat_speed": 6,
           "wrt_algorithm_type": "gcr_slider",
-          "wrt_contraints_list": ["land_crossing_global_land_mask", "on_map"]
+          "wrt_constraints_list": ["land_crossing_global_land_mask", "on_map"]
         }
       }'
 ```
