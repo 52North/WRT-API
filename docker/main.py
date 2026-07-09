@@ -14,7 +14,7 @@ from WeatherRoutingTool.ship.ship_config import ShipConfig
 os.environ["AWS_REQUEST_CHECKSUM_CALCULATION"] = "when_required"
 os.environ["AWS_RESPONSE_CHECKSUM_VALIDATION"] = "when_required"
 
-logger = logging.getLogger('WRT.API')
+logger = logging.getLogger("WRT.API")
 
 
 def extract_params_from_process_inputs(inputs: dict = None):
@@ -47,9 +47,7 @@ def upload_folder_to_s3_bucket(
     :type anon: bool
     :return:
     """
-    logger.info(
-        f"Start uploading outputs from '{local_path}' to '{endpoint_url}/{bucket_path}'"
-    )
+    logger.info(f"Start uploading outputs from '{local_path}' to '{endpoint_url}/{bucket_path}'")
     files = [file for file in pathlib.Path(local_path).rglob("*") if file.is_file()]
     idx = 1
     count = len(files)
@@ -132,7 +130,7 @@ def main():
         "BOAT_AYV": 1910,
         "BOAT_AOD": 529,
         "BOAT_CMC": 8.1,
-        "BOAT_HC": 7.06
+        "BOAT_HC": 7.06,
     }
     ship_config_dict = ship_config_dict | input_config
     ship_config = ShipConfig.validate_config(ship_config_dict)
@@ -148,9 +146,7 @@ def main():
     logger.info(f"Overall runtime : {(datetime.now() - start).total_seconds():8.3f}s")
     logger.info("PYGEOAPI_K8S_MANAGER_RESULT_MIMETYPE:application/json")
     process_id = os.getenv("PYGEOAPI_PROCESS_ID", "process-id-not-defined-in-env")
-    logger.info(
-        f'PYGEOAPI_K8S_MANAGER_RESULT_START\n{{"id":"{process_id}","value":"{output_target}"}}'
-    )
+    logger.info(f'PYGEOAPI_K8S_MANAGER_RESULT_START\n{{"id":"{process_id}","value":"{output_target}"}}')
 
 
 if __name__ == "__main__":
