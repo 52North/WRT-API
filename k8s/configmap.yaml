@@ -138,26 +138,33 @@ data:
                 href: https://github.com/52North/WeatherRoutingTool
                 hreflang: en-UK
             inputs:
-              wrt_*:
-                title: Weather Routing Tool config parameter
-                description: Input parameters with the prefix "wrt_" are mapped to the corresponding config parameter (https://52north.github.io/WeatherRoutingTool/source/configuration.html). Use all lowercase characters for the process inputs.
-                schema:
-                  type: string
               wrt_departure_time:
                 title: Departure time
                 description: Departure time in the format 'yyyy-mm-ddThh:mmZ'. Maps to the config parameter DEPARTURE_TIME.
+                minOccurs: 1
+                maxOccurs: 1
                 schema:
                   type: string
               wrt_default_route:
                 title: Default route
                 description: Source and destination in the format '(lat_start, lon_start, lat_end, lon_end)'. Maps to the config parameter DEFAULT_ROUTE.
+                minOccurs: 1
+                maxOccurs: 1
                 schema:
-                  type: string
+                  type: array
               wrt_default_map:
                 title: Default map
                 description: Map/bbox in the format '(lat_min, lon_min, lat_max, lon_max)'. Maps to the config parameter DEFAULT_MAP.
+                minOccurs: 1
+                maxOccurs: 1
                 schema:
-                  type: string
+                  type: array
+              wrt_*:
+                title: Weather Routing Tool config parameter
+                description: Input parameters with the prefix "wrt_" are mapped to the corresponding config parameter (https://52north.github.io/WeatherRoutingTool/source/configuration.html). Use all lowercase characters for the process inputs.
+                minOccurs: 0
+                schema:
+                  type: unknown
             outputs:
               logs:
                 title: logs
