@@ -173,7 +173,6 @@ This will return a link to the s3 output folder. From there the actual route can
    - Visit Alarik at <http://localhost:30100/> and login (default: alarik/alarik).
    - Navigate to the output folder and download the final route (`route_gcr_slider.geojson` if you use the example request).
 2. Programmatically:
-   - Alarik currently doesn't support public download urls (see https://github.com/achtungsoftware/alarik/issues/7).
    - Via shell and Alarik's internal API:
     ```shell
     curl -v -X 'POST' \
@@ -195,6 +194,9 @@ This will return a link to the s3 output folder. From there the actual route can
     # Substitute the string "2026-03-06_d63f2052-193e-11f1-beea-4661ad013146" in the path with the one from the response
     s3.get("wrt/k8s-job-manager/processes/weather-routing-tool/outputs/2026-03-06_d63f2052-193e-11f1-beea-4661ad013146/route_gcr_slider.geojson", "~/Downloads/route_gcr_slider.geojson")
     ```
+
+*Note: since version 1.0.0-alpha-15 Alarik also supports sharing objects via public download links (https://alarik.io/docs/internal-api/user/objects/share, https://github.com/achtungsoftware/alarik/issues/7).
+For the time being, we will not implement this as it would require custom code for Alarik and we would like stay generic.*
 
 ## Remove cluster
 
