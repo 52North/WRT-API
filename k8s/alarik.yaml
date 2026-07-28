@@ -45,8 +45,8 @@ spec:
           value: http://localhost:30090
         - name: CONSOLE_BASE_URL
           value: http://localhost:30100
-#        - name: JWT
-#          value: YOUR_SECURE_JWT_KEY
+        - name: JWT
+          value: "alarik-jwt"
         - name: ALLOW_ACCOUNT_CREATION
           value: "false"
         ports:
