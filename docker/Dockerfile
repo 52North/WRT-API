@@ -6,7 +6,7 @@ FROM python:3.13-slim
 RUN apt-get update \
  && apt-get upgrade -y \
  && apt-get dist-upgrade -y \
- && apt-get install git -y
+ && apt-get install libexpat1 git -y
 
 WORKDIR /app
 
